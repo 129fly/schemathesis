@@ -117,6 +117,8 @@ class Case:
         url = urljoin(base_url + "/", formatted_path)
         # Form data and body are mutually exclusive
         extra: Dict[str, Optional[Body]]
+        # TODO. "data" can be combined with "files", when e.g. there are multiple files to send and still some
+        # extra form fields
         if self.form_data:
             extra = {"files": self.form_data}
         elif is_multipart(self.body):

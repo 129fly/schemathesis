@@ -327,15 +327,18 @@ class OpenApi30(SwaggerV20):  # pylint: disable=too-many-ancestors
 
     def process_body(self, endpoint: Endpoint, parameter: Dict[str, Any]) -> None:
         # Take the first media type object
-        options = iter(parameter["content"].values())
-        parameter = next(options)
+        options = iter(parameter["content"].items())
+        content_type, parameter = next(options)
         # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#media-type-object
         # > Furthermore, if referencing a schema which contains an example,
         # > the example value SHALL override the example provided by the schema
         if "example" in parameter:
             schema = get_schema_from_parameter(parameter)
             schema["example"] = parameter["example"]
-        super().process_body(endpoint, parameter)
+        if content_type == "multipart/form-data":
+            endpoint.form_data = parameter["schema"]
+        else:
+            super().process_body(endpoint, parameter)
 
     def parameter_to_json_schema(self, data: Dict[str, Any]) -> Dict[str, Any]:
         schema = get_schema_from_parameter(data)

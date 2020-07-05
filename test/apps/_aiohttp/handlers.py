@@ -93,7 +93,10 @@ def _decode_multipart(content: bytes, content_type: str) -> Dict[str, str]:
     _, options = cgi.parse_header(content_type)
     options["boundary"] = options["boundary"].encode()
     options["CONTENT-LENGTH"] = len(content)
-    return {key: value[0].decode() for key, value in cgi.parse_multipart(io.BytesIO(content), options).items()}
+    return {
+        key: value[0].decode() if isinstance(value[0], bytes) else value[0]
+        for key, value in cgi.parse_multipart(io.BytesIO(content), options).items()
+    }
 
 
 async def multipart(request: web.Request) -> web.Response:
